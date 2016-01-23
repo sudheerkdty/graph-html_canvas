@@ -61,7 +61,7 @@ function draw_link(t){
 	
 }
 
-function is_node(){
+function is_node(){//checks if the mouse clickd position is a node & returns position of nearby node(vertice)
 	var coord = [];
 	var x = event.clientX;     // Get the horizontal coordinate
 	var y = event.clientY;     // Get the vertical coordinate
@@ -90,14 +90,11 @@ function is_node(){
 	
 }
 
-function get_node(x,y){
+function get_node(x,y){//returns node at position (x,y)
 	var dest = [];
 	dest.push(x,y);
 	for(var i = 1;i<=flag; i++){
-		//console.log("dest:"+node_position[i]+":"+dest);
 		if (node_position[i][0] === dest[0]&&node_position[i][1] === dest[1]){
-			//console.log("value of i = "+i);			
-						
 			return i		
 		}
 	}
@@ -114,7 +111,7 @@ function remove_junk_data(list){
 	}return a
 }
 
-function adjacency(){
+function adjacency(){//returns a dict with keys as nodes and values as list of vertices connected to it
 	var adjacency_list = {};
 	var t = [];
 	for (var i in node_position){
@@ -132,12 +129,10 @@ function inArray(elem, array){
 		}
 	}
 }
-function get_next_node(node){
+function get_next_node(node){// Return a list of vertices connected to the given node
 	var nodes = remove_junk_data(linked);
-	//console.log(JSON.stringify(nodes));
 	var node_list = [];
 	for (var i in nodes){
-		//console.log(nodes[i]);
 		if (nodes[i][0] === node){
 			node_list.push(nodes[i][1]);		
 		}
@@ -174,7 +169,47 @@ function bfs(adj){
 				}colour++
 	}return visited
 }
+function find_length(v1,v2,option){ //find the length of line between two edges
+	//node_position 
+	var pos_v1 = node_position[v1];
+	var pos_v2 = node_position[v2];
+	var x1 = pos_v1[0];
+	var y1 = pos_v1[1];
+	var x2 = pos_v2[0];
+	var y2 = pos_v2[1];
+	if (option == 1){//to find midpoint
+		var length = [];
+		var x = (x1 + x2)/2;
+		var y = (y1 + y2)/2;
+		length.push(Math.ceil(x),Math.ceil(y));
+		}
+	else{
+		var length = Math.ceil(Math.sqrt((Math.pow(Math.abs(x2-x1),2)) +(Math.pow(Math.abs(y2-y1),2))));
+		
+	}
+	return  length
+}
+function edge_weight(){
+	var edge_weights = {};
+	var edges = remove_junk_data(linked);
+	for (var i in edges){
+			//console.log(edges[i][0]);
+			edge_weights[edges[i]] = find_length(parseInt(edges[i][0]),parseInt(edges[i][1]),0);
+	}
+	return edge_weights
+}
 
+function write_edge_weight(){
+	var c = document.getElementById("myCanvas");
+	var ctx = c.getContext("2d");
+	var edges = remove_junk_data(linked);
+	for (var i in edges){
+		var fla =find_length(parseInt(edges[i][0]),parseInt(edges[i][1]),0);
+		var coor = find_length(parseInt(edges[i][0]),parseInt(edges[i][1]),1)
+		ctx.fillText(fla,coor[0]-10,coor[1]);
+	}
+	
+}
 function whichButton(buttonElement){
 	var buttonClickedId = buttonElement.id;
 	if( buttonClickedId === 'node' ){
@@ -187,17 +222,20 @@ function whichButton(buttonElement){
 		Y = NaN;
 		document.getElementById("myCanvas").onclick = function (){
 			draw_link(3)
+			
 		}
 	}
-	else if( buttonClickedId === 'disp' ){
-		var obj = JSON.stringify(node_position);
-		var obj0 = JSON.stringify(remove_junk_data(linked));
-		document.getElementById("nodel").innerHTML =obj+"<br>"+obj0;
+	else if( buttonClickedId === 'Edge_Weight' ){
+		//var obj = JSON.stringify(node_position);
+		var obj = JSON.stringify(edge_weight());//JSON.stringify(remove_junk_data(linked));
+		write_edge_weight()
+		document.getElementById("nodel").innerHTML =obj;//+"<br>"+obj0;
 		
 	}
 	else if( buttonClickedId === 'adjacency' ){
+		var obj = JSON.stringify(node_position);
 		var obj1 = JSON.stringify(adjacency());
-		document.getElementById("nodel").innerHTML = "Connected Edges are"+obj1;
+		document.getElementById("nodel").innerHTML = "Connected Edges are"+ obj1 + "<br>"+"Node Position:"+obj;
 	}
 	else if( buttonClickedId === 'bfs' ){
 		bfs(adjacency())
@@ -221,5 +259,4 @@ timer = false;
 }
 }
 
-//console.log(node_position);
 draw_canvas()
